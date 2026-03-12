@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>División de Facción</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #d4a843;
+    --gold-light: #f0c97a;
+    --greece-blue: #1a3a6e;
+    --greece-cyan: #4ab8d4;
+    --egypt-dark: #1a0a00;
+    --egypt-amber: #c4841a;
+    --egypt-sand: #e8c87a;
+    --center-purple: #2d0a4a;
+    --center-violet: #9b59b6;
+    --dark-bg: #070510;
+    --white: #f5f0e8;
+  }
+
+  body {
+    background: var(--dark-bg);
+    font-family: 'Cinzel', serif;
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD ── */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,.7) 0%, transparent 100%),
+      radial-gradient(2px 2px at 35% 60%, rgba(212,168,67,.6) 0%, transparent 100%),
+      radial-gradient(2px 2px at 70% 45%, rgba(74,184,212,.4) 0%, transparent 100%);
+  }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 1200px; margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  .main-title {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .main-title h1 {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #f0c97a, #d4a843, #fff8dc, #d4a843);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    letter-spacing: .05em;
+    line-height: 1.1;
+  }
+  .main-title .subtitle {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    color: rgba(212,168,67,.7);
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+  .divider-ornament {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    margin: 20px 0;
+  }
+  .divider-ornament .line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .divider-ornament .gem { font-size: 1.2rem; }
+
+  /* ── FACTION SPLIT ── */
+  .factions-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    margin-bottom: 60px;
+  }
+  @media(max-width:700px){ .factions-row { grid-template-columns: 1fr; } }
+
+  .faction-card {
+    border-radius: 16px;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .faction-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 16px;
+    background: inherit; opacity: .15; filter: blur(40px);
+  }
+  .faction-card.greece {
+    background: linear-gradient(145deg, #0c1f42 0%, #1a3a6e 50%, #0d2b54 100%);
+    border: 1px solid rgba(74,184,212,.35);
+    box-shadow: 0 0 40px rgba(74,184,212,.15), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .faction-card.egypt {
+    background: linear-gradient(145deg, #1a0800 0%, #2e1500 50%, #1a0a00 100%);
+    border: 1px solid rgba(196,132,26,.35);
+    box-shadow: 0 0 40px rgba(196,132,26,.15), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .faction-icon { font-size: 3rem; line-height: 1; margin-bottom: 12px; }
+  .faction-name {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 1.6rem; font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .greece .faction-name { color: var(--greece-cyan); text-shadow: 0 0 20px rgba(74,184,212,.5); }
+  .egypt  .faction-name { color: var(--egypt-sand);  text-shadow: 0 0 20px rgba(232,200,122,.4); }
+
+  .bonus-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .85rem; color: rgba(255,255,255,.8);
+    margin-bottom: 8px;
+  }
+  .bonus-badge {
+    padding: 3px 10px; border-radius: 20px;
+    font-size: .75rem; font-weight: 700; letter-spacing: .05em;
+    white-space: nowrap;
+  }
+  .greece .bonus-badge { background: rgba(74,184,212,.2); border: 1px solid rgba(74,184,212,.5); color: #7dd4e8; }
+  .egypt  .bonus-badge { background: rgba(196,132,26,.2); border: 1px solid rgba(196,132,26,.5); color: var(--egypt-sand); }
+
+  .aesthetic-tags {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px;
+  }
+  .tag {
+    padding: 4px 10px; border-radius: 6px; font-size: .72rem;
+    font-family: 'Crimson Text', serif; font-style: italic;
+    color: rgba(255,255,255,.6);
+  }
+  .greece .tag { background: rgba(74,184,212,.1); border: 1px solid rgba(74,184,212,.2); }
+  .egypt  .tag { background: rgba(196,132,26,.1); border: 1px solid rgba(196,132,26,.2); }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    text-align: center;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── TERRITORY GRID ── */
+  .territory-section { margin-bottom: 60px; }
+
+  .territory-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 20px; padding-bottom: 12px;
+  }
+  .territory-header .th-icon { font-size: 2rem; }
+  .territory-header h3 {
+    font-size: 1.2rem; letter-spacing: .1em; text-transform: uppercase;
+  }
+  .greece-header { border-bottom: 2px solid rgba(74,184,212,.4); }
+  .greece-header h3 { color: var(--greece-cyan); }
+  .egypt-header  { border-bottom: 2px solid rgba(196,132,26,.4); }
+  .egypt-header  h3 { color: var(--egypt-sand); }
+  .center-header { border-bottom: 2px solid rgba(155,89,182,.4); }
+  .center-header h3 { color: #c77dff; }
+
+  .territory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 14px;
+  }
+
+  .t-card {
+    border-radius: 10px; padding: 16px 14px;
+    position: relative; transition: transform .2s;
+  }
+  .t-card:hover { transform: translateY(-3px); }
+
+  .t-card.g {
+    background: linear-gradient(135deg, rgba(26,58,110,.7), rgba(12,31,66,.9));
+    border: 1px solid rgba(74,184,212,.25);
+  }
+  .t-card.e {
+    background: linear-gradient(135deg, rgba(46,21,0,.8), rgba(26,8,0,.95));
+    border: 1px solid rgba(196,132,26,.25);
+  }
+  .t-card.c {
+    background: linear-gradient(135deg, rgba(45,10,74,.8), rgba(20,4,36,.95));
+    border: 1px solid rgba(155,89,182,.3);
+  }
+
+  .t-num {
+    position: absolute; top: 10px; right: 12px;
+    font-size: .65rem; font-weight: 700; opacity: .45; letter-spacing: .1em;
+  }
+  .t-card.g .t-num { color: var(--greece-cyan); }
+  .t-card.e .t-num { color: var(--egypt-sand); }
+  .t-card.c .t-num { color: #c77dff; }
+
+  .t-name {
+    font-size: .88rem; font-weight: 700; letter-spacing: .04em;
+    margin-bottom: 6px; padding-right: 28px;
+  }
+  .t-card.g .t-name { color: #a8dce8; }
+  .t-card.e .t-name { color: #e8c87a; }
+  .t-card.c .t-name { color: #d4a8ff; }
+
+  .t-desc {
+    font-family: 'Crimson Text', serif;
+    font-size: .8rem; color: rgba(255,255,255,.55);
+    line-height: 1.4;
+  }
+  .t-badge {
+    display: inline-block; margin-top: 8px;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+  }
+  .t-card.g .t-badge { background: rgba(74,184,212,.15); color: #7dd4e8; border: 1px solid rgba(74,184,212,.3); }
+  .t-card.e .t-badge { background: rgba(196,132,26,.15); color: var(--egypt-sand); border: 1px solid rgba(196,132,26,.3); }
+  .t-card.c .t-badge { background: rgba(155,89,182,.2); color: #c77dff; border: 1px solid rgba(155,89,182,.35); }
+
+  /* ── RELICS ── */
+  .relics-section { margin-bottom: 60px; }
+  .relics-columns {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .relic-group { border-radius: 12px; padding: 24px 20px; }
+  .relic-group.greek { background: linear-gradient(145deg,rgba(26,58,110,.5),rgba(8,20,50,.8)); border: 1px solid rgba(74,184,212,.2); }
+  .relic-group.egyptian { background: linear-gradient(145deg,rgba(46,21,0,.5),rgba(18,6,0,.8)); border: 1px solid rgba(196,132,26,.2); }
+  .relic-group.legend { background: linear-gradient(145deg,rgba(45,10,74,.5),rgba(15,3,28,.8)); border: 1px solid rgba(155,89,182,.25); }
+
+  .rg-title {
+    font-size: .8rem; letter-spacing: .2em; text-transform: uppercase;
+    margin-bottom: 16px; padding-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .greek .rg-title    { color: var(--greece-cyan); border-bottom: 1px solid rgba(74,184,212,.3); }
+  .egyptian .rg-title { color: var(--egypt-sand);  border-bottom: 1px solid rgba(196,132,26,.3); }
+  .legend .rg-title   { color: #c77dff; border-bottom: 1px solid rgba(155,89,182,.3); }
+
+  .relic-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .relic-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .relic-info .relic-name { font-size: .82rem; font-weight: 700; color: rgba(255,255,255,.9); }
+  .relic-info .relic-bonus { font-family: 'Crimson Text', serif; font-size: .78rem; color: rgba(255,255,255,.5); }
+
+  /* ── BOSSES ── */
+  .bosses-section { margin-bottom: 60px; }
+  .bosses-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+  }
+  .boss-card {
+    border-radius: 12px; padding: 24px 18px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .boss-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.05), transparent 70%);
+    pointer-events: none;
+  }
+  .boss-card.b1 { background: linear-gradient(160deg,#0c1535,#0a1020); border: 1px solid rgba(74,184,212,.3); }
+  .boss-card.b2 { background: linear-gradient(160deg,#1a0800,#0a0400); border: 1px solid rgba(196,132,26,.3); }
+  .boss-card.b3 { background: linear-gradient(160deg,#1a0a00,#130700); border: 1px solid rgba(255,160,50,.25); }
+  .boss-card.b4 { background: linear-gradient(160deg,#1a001a,#0d000d); border: 1px solid rgba(155,89,182,.35); }
+  .boss-card.b5 { background: linear-gradient(160deg,#1a0000,#0d0000); border: 1px solid rgba(220,60,60,.3); }
+
+  .boss-emoji { font-size: 2.8rem; display: block; margin-bottom: 12px; }
+  .boss-name { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .boss-card.b1 .boss-name { color: #7dd4e8; }
+  .boss-card.b2 .boss-name { color: var(--egypt-sand); }
+  .boss-card.b3 .boss-name { color: #ffc97a; }
+  .boss-card.b4 .boss-name { color: #c77dff; }
+  .boss-card.b5 .boss-name { color: #ff7a7a; }
+
+  .boss-detail { font-family: 'Crimson Text', serif; font-size: .8rem; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+  .boss-drop { margin-top: 10px; padding: 5px 12px; border-radius: 20px; display: inline-block; font-size: .72rem; font-weight: 700; }
+  .boss-card.b1 .boss-drop { background: rgba(74,184,212,.15); color: #7dd4e8; border: 1px solid rgba(74,184,212,.3); }
+  .boss-card.b2 .boss-drop { background: rgba(196,132,26,.15); color: var(--egypt-sand); border: 1px solid rgba(196,132,26,.3); }
+  .boss-card.b3 .boss-drop { background: rgba(255,160,50,.12); color: #ffc97a; border: 1px solid rgba(255,160,50,.25); }
+  .boss-card.b4 .boss-drop { background: rgba(155,89,182,.15); color: #c77dff; border: 1px solid rgba(155,89,182,.3); }
+  .boss-card.b5 .boss-drop { background: rgba(220,60,60,.12); color: #ff7a7a; border: 1px solid rgba(220,60,60,.25); }
+
+  /* ── THRONE HIGHLIGHT ── */
+  .throne-highlight {
+    border-radius: 16px; padding: 32px;
+    background: linear-gradient(135deg, #1a0a30, #0d0520);
+    border: 1px solid rgba(155,89,182,.4);
+    box-shadow: 0 0 60px rgba(155,89,182,.15);
+    text-align: center; margin-bottom: 60px;
+  }
+  .throne-highlight h3 {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+    color: #d4a8ff;
+    margin-bottom: 16px;
+    text-shadow: 0 0 30px rgba(155,89,182,.6);
+  }
+  .throne-bonuses {
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .throne-bonus {
+    padding: 8px 20px; border-radius: 8px;
+    font-size: .85rem; font-weight: 700;
+    background: rgba(155,89,182,.2); border: 1px solid rgba(155,89,182,.4); color: #c77dff;
+  }
+  .throne-penalty {
+    font-family: 'Crimson Text', serif; color: rgba(255,100,100,.7); font-size: .95rem;
+  }
+
+  /* ── MAP VISUAL ── */
+  .map-overview {
+    display: flex; justify-content: center; gap: 0; margin-bottom: 60px;
+  }
+  .map-column {
+    flex: 1; max-width: 280px; padding: 20px 16px; border-radius: 12px;
+    text-align: center;
+  }
+  .map-col-greece {
+    background: linear-gradient(160deg, rgba(26,58,110,.6), rgba(8,20,50,.8));
+    border: 1px solid rgba(74,184,212,.2);
+    border-right: none; border-radius: 12px 0 0 12px;
+  }
+  .map-col-center {
+    background: linear-gradient(160deg, rgba(45,10,74,.7), rgba(20,4,36,.9));
+    border: 1px solid rgba(155,89,182,.3);
+    z-index: 1;
+  }
+  .map-col-egypt {
+    background: linear-gradient(160deg, rgba(46,21,0,.6), rgba(18,6,0,.8));
+    border: 1px solid rgba(196,132,26,.2);
+    border-left: none; border-radius: 0 12px 12px 0;
+  }
+  .map-col-num { font-size: 3rem; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+  .map-col-greece .map-col-num { color: var(--greece-cyan); }
+  .map-col-center .map-col-num { color: #c77dff; }
+  .map-col-egypt  .map-col-num { color: var(--egypt-sand); }
+  .map-col-label { font-size: .75rem; letter-spacing: .15em; text-transform: uppercase; opacity: .7; }
+
+  /* ── FOOTER ── */
+  .footer-ornament {
+    text-align: center; margin-top: 40px;
+    font-family: 'Crimson Text', serif; font-style: italic;
+    color: rgba(212,168,67,.4); font-size: .9rem; letter-spacing: .2em;
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="main-title">
+    <h1>DIVISIÓN DE FACCIÓN</h1>
+    <div class="divider-ornament">
+      <div class="line"></div>
+      <span class="gem">⚜</span>
+      <div class="line"></div>
+    </div>
+    <p class="subtitle">Elige tu destino — Forja tu imperio</p>
+  </div>
+
+  <!-- FACTIONS -->
+  <div class="factions-row">
+    <div class="faction-card greece">
+      <div class="faction-icon">⚔️</div>
+      <div class="faction-name">GRECIA</div>
+      <div class="bonus-row"><span class="bonus-badge">+5% DAÑO PvP</span></div>
+      <div class="bonus-row"><span class="bonus-badge">+10% VELOCIDAD ATAQUE</span></div>
+      <div class="bonus-row"><span class="bonus-badge">RELIQUIAS DE COMBATE</span></div>
+      <div class="aesthetic-tags">
+        <span class="tag">🏛 Templos</span>
+        <span class="tag">⛰ Montañas</span>
+        <span class="tag">🪨 Mármol</span>
+        <span class="tag">🌿 Bosques</span>
+      </div>
+    </div>
+    <div class="faction-card egypt">
+      <div class="faction-icon">🐍</div>
+      <div class="faction-name">EGIPTO</div>
+      <div class="bonus-row"><span class="bonus-badge">+10% ECONOMÍA</span></div>
+      <div class="bonus-row"><span class="bonus-badge">+5% RESISTENCIA</span></div>
+      <div class="bonus-row"><span class="bonus-badge">RELIQUIAS MÍSTICAS</span></div>
+      <div class="aesthetic-tags">
+        <span class="tag">🔺 Pirámides</span>
+        <span class="tag">🏜 Arena</span>
+        <span class="tag">🗿 Ruinas</span>
+        <span class="tag">🌴 Oasis</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP OVERVIEW -->
+  <div class="section-title">🗺 LOS 25 TERRITORIOS</div>
+  <div class="map-overview">
+    <div class="map-column map-col-greece">
+      <div class="map-col-num">10</div>
+      <div style="font-size:.9rem; color:var(--greece-cyan); margin-bottom:4px;">🇬🇷 GRECIA</div>
+      <div class="map-col-label">territorios</div>
+    </div>
+    <div class="map-column map-col-center">
+      <div class="map-col-num">5</div>
+      <div style="font-size:.9rem; color:#c77dff; margin-bottom:4px;">⚔️ CENTRO</div>
+      <div class="map-col-label">disputados</div>
+    </div>
+    <div class="map-column map-col-egypt">
+      <div class="map-col-num">10</div>
+      <div style="font-size:.9rem; color:var(--egypt-sand); margin-bottom:4px;">🐍 EGIPTO</div>
+      <div class="map-col-label">territorios</div>
+    </div>
+  </div>
+
+  <!-- GREECE TERRITORIES -->
+  <div class="territory-section">
+    <div class="territory-header greece-header">
+      <span class="th-icon">🇬🇷</span>
+      <h3>Territorios de Grecia</h3>
+    </div>
+    <div class="territory-grid">
+      <div class="t-card g"><span class="t-num">01</span><div class="t-name">Monte Olimpo</div><div class="t-desc">Territorio legendario. Fragmentos divinos.</div><span class="t-badge">⚡ Descenso de Zeus</span></div>
+      <div class="t-card g"><span class="t-num">02</span><div class="t-name">Esparta</div><div class="t-desc">Zona PvP brutal.</div><span class="t-badge">+10% DAÑO PvP</span></div>
+      <div class="t-card g"><span class="t-num">03</span><div class="t-name">Bosque de Artemisa</div><div class="t-desc">PvE intenso. Pieles raras y artefactos de caza.</div><span class="t-badge">🏹 PvE</span></div>
+      <div class="t-card g"><span class="t-num">04</span><div class="t-name">Atenas Antigua</div><div class="t-desc">Centro económico. Reduce impuestos del clan.</div><span class="t-badge">💰 ECONOMÍA</span></div>
+      <div class="t-card g"><span class="t-num">05</span><div class="t-name">Acantilados de Poseidón</div><div class="t-desc">Genera recursos marinos raros.</div><span class="t-badge">🔱 MARINO</span></div>
+      <div class="t-card g"><span class="t-num">06</span><div class="t-name">Santuario de Apolo</div><div class="t-desc">Misiones diarias disponibles.</div><span class="t-badge">☀️ MISIONES</span></div>
+      <div class="t-card g"><span class="t-num">07</span><div class="t-name">Ruinas de Delfos</div><div class="t-desc">Profecías. Revela eventos futuros.</div><span class="t-badge">🔮 PROFECÍA</span></div>
+      <div class="t-card g"><span class="t-num">08</span><div class="t-name">Valle de Ares</div><div class="t-desc">PvP constante en zona de guerra.</div><span class="t-badge">⚔️ PvP</span></div>
+      <div class="t-card g"><span class="t-num">09</span><div class="t-name">Coloso de Rodas</div><div class="t-desc">Evento boss mundial.</div><span class="t-badge">👥 20+ JUG.</span></div>
+      <div class="t-card g"><span class="t-num">10</span><div class="t-name">Islas Egeas</div><div class="t-desc">Difícil de defender. Recursos insulares.</div><span class="t-badge">🌊 PELIGROSO</span></div>
+    </div>
+  </div>
+
+  <!-- EGYPT TERRITORIES -->
+  <div class="territory-section">
+    <div class="territory-header egypt-header">
+      <span class="th-icon">🐍</span>
+      <h3>Territorios de Egipto</h3>
+    </div>
+    <div class="territory-grid">
+      <div class="t-card e"><span class="t-num">11</span><div class="t-name">Pirámide de Keops</div><div class="t-desc">Drop de reliquias legendarias.</div><span class="t-badge">🔺 RELIQUIAS</span></div>
+      <div class="t-card e"><span class="t-num">12</span><div class="t-name">Valle de los Reyes</div><div class="t-desc">PvE de alto nivel.</div><span class="t-badge">☠️ ALTO NIVEL</span></div>
+      <div class="t-card e"><span class="t-num">13</span><div class="t-name">Oasis de Bastet</div><div class="t-desc">Zona segura temporal.</div><span class="t-badge">🐱 SEGURO</span></div>
+      <div class="t-card e"><span class="t-num">14</span><div class="t-name">Desierto de Set</div><div class="t-desc">Mobs agresivos en todo el territorio.</div><span class="t-badge">🌪 PELIGROSO</span></div>
+      <div class="t-card e"><span class="t-num">15</span><div class="t-name">Templo de Anubis</div><div class="t-desc">Evento especial nocturno.</div><span class="t-badge">🌙 NOCTURNO</span></div>
+      <div class="t-card e"><span class="t-num">16</span><div class="t-name">Río Nilo</div><div class="t-desc">Genera recursos económicos constantes.</div><span class="t-badge">💧 RECURSOS</span></div>
+      <div class="t-card e"><span class="t-num">17</span><div class="t-name">Biblioteca de Thoth</div><div class="t-desc">Bonificación de experiencia global.</div><span class="t-badge">+XP GLOBAL</span></div>
+      <div class="t-card e"><span class="t-num">18</span><div class="t-name">Necrópolis</div><div class="t-desc">Boss constante activo.</div><span class="t-badge">👁 BOSS</span></div>
+      <div class="t-card e"><span class="t-num">19</span><div class="t-name">Templo Solar de Ra</div><div class="t-desc">Eventos durante el día solar.</div><span class="t-badge">☀️ SOLAR</span></div>
+      <div class="t-card e"><span class="t-num">20</span><div class="t-name">Laberinto de Sobek</div><div class="t-desc">Dungeon de instancia.</div><span class="t-badge">🐊 DUNGEON</span></div>
+    </div>
+  </div>
+
+  <!-- CENTER TERRITORIES -->
+  <div class="territory-section">
+    <div class="territory-header center-header">
+      <span class="th-icon">⚔️</span>
+      <h3>Territorios Centrales</h3>
+    </div>
+    <div class="territory-grid">
+      <div class="t-card c"><span class="t-num">21</span><div class="t-name">Ruinas del Primer Imperio</div><div class="t-desc">Territorio más valioso. Fragmentos legendarios.</div><span class="t-badge">👑 LEGENDARIO</span></div>
+      <div class="t-card c"><span class="t-num">22</span><div class="t-name">Arena de los Titanes</div><div class="t-desc">Clan Wars automáticas.</div><span class="t-badge">⚔️ CLAN WAR</span></div>
+      <div class="t-card c"><span class="t-num">23</span><div class="t-name">Puerta del Inframundo</div><div class="t-desc">Bosses constantes activos.</div><span class="t-badge">🔥 BOSSES</span></div>
+      <div class="t-card c"><span class="t-num">24</span><div class="t-name">Ciudad Perdida</div><div class="t-desc">Recursos únicos exclusivos.</div><span class="t-badge">💎 ÚNICO</span></div>
+      <div class="t-card c" style="border-color:rgba(155,89,182,.6); box-shadow: 0 0 20px rgba(155,89,182,.2)"><span class="t-num">25</span><div class="t-name" style="color:#e0b8ff">Trono del Dominador</div><div class="t-desc">El territorio central. Quien lo controle domina el servidor.</div><span class="t-badge">🔱 DOMINIO</span></div>
+    </div>
+  </div>
+
+  <!-- THRONE HIGHLIGHT -->
+  <div class="throne-highlight">
+    <h3>👑 TRONO DEL DOMINADOR — Territorio 25</h3>
+    <div class="throne-bonuses">
+      <div class="throne-bonus">+10% Economía Global</div>
+      <div class="throne-bonus">+5% PvP</div>
+    </div>
+    <p class="throne-penalty">⚠️ Mantenimiento x3 — El poder tiene un precio</p>
+  </div>
+
+  <!-- RELICS -->
+  <div class="relics-section">
+    <div class="section-title">🧿 RELIQUIAS DEL MUNDO (20)</div>
+    <div class="relics-columns">
+      <div class="relic-group greek">
+        <div class="rg-title">⚔️ Reliquias Griegas</div>
+        <div class="relic-item"><span class="relic-icon">⚔️</span><div class="relic-info"><div class="relic-name">Espada de Ares</div><div class="relic-bonus">+20% daño PvP</div></div></div>
+        <div class="relic-item"><span class="relic-icon">🛡</span><div class="relic-info"><div class="relic-name">Escudo de Atenea</div><div class="relic-bonus">Reduce daño recibido</div></div></div>
+        <div class="relic-item"><span class="relic-icon">🔱</span><div class="relic-info"><div class="relic-name">Tridente de Poseidón</div><div class="relic-bonus">Control del agua</div></div></div>
+        <div class="relic-item"><span class="relic-icon">🏹</span><div class="relic-info"><div class="relic-name">Arco de Artemisa</div><div class="relic-bonus">Críticos más frecuentes</div></div></div>
+        <div class="relic-item"><span class="relic-icon">⚡</span><div class="relic-info"><div class="relic-name">Rayo de Zeus</div><div class="relic-bonus">Habilidad activa devastadora</div></div></div>
+      </div>
+      <div class="relic-group egyptian">
+        <div class="rg-title">🐍 Reliquias Egipcias</div>
+        <div class="relic-item"><span class="relic-icon">👑</span><div class="relic-info"><div class="relic-name">Corona de Ra</div><div class="relic-bonus">+15% ingresos</div></div></div>
+        <div class="relic-item"><span class="relic-icon">👁</span><div class="relic-info"><div class="relic-name">Ojo de Horus</div><div class="relic-bonus">Detecta enemigos invisibles</div></div></div>
+        <div class="relic-item"><span class="relic-icon">📜</span><div class="relic-info"><div class="relic-name">Báculo de Thoth</div><div class="relic-bonus">+XP global</div></div></div>
+        <div class="relic-item"><span class="relic-icon">🔮</span><div class="relic-info"><div class="relic-name">Amuleto de Anubis</div><div class="relic-bonus">Reduce upkeep</div></div></div>
+        <div class="relic-item"><span class="relic-icon">🐊</span><div class="relic-info"><div class="relic-name">Colmillo de Sobek</div><div class="relic-bonus">+daño PvE</div></div></div>
+      </div>
+      <div class="relic-group legend">
+        <div class="rg-title">✨ Reliquias Legendarias</div>
+        <div class="relic-item"><span class="relic-icon">👑</span><div class="relic-info"><div class="relic-name">Corona de Imperium</div><div class="relic-bonus">Dominio territorial absoluto</div></div></div>
+        <div class="relic-item"><span class="relic-icon">🗝</span><div class="relic-info"><div class="relic-name">Llave del Inframundo</div><div class="relic-bonus">Invoca boss mundial</div></div></div>
+        <div class="relic-item"><span class="relic-icon">💥</span><div class="relic-info"><div class="relic-name">Fragmento del Caos</div><div class="relic-bonus">Poder aleatorio imprevisible</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOSSES -->
+  <div class="bosses-section">
+    <div class="section-title">👹 BOSSES DEL MUNDO</div>
+    <div class="bosses-grid">
+      <div class="boss-card b1">
+        <span class="boss-emoji">⚡</span>
+        <div class="boss-name">Zeus Desatado</div>
+        <div class="boss-detail">📍 Monte Olimpo</div>
+        <div class="boss-detail">Evento server-wide</div>
+        <div class="boss-drop">DROP: Rayo de Zeus</div>
+      </div>
+      <div class="boss-card b2">
+        <span class="boss-emoji">⚖️</span>
+        <div class="boss-name">Anubis Guardián</div>
+        <div class="boss-detail">📍 Templo de Anubis</div>
+        <div class="boss-detail">Evento nocturno</div>
+        <div class="boss-drop">DROP: Amuleto de Anubis</div>
+      </div>
+      <div class="boss-card b3">
+        <span class="boss-emoji">🗿</span>
+        <div class="boss-name">Coloso de Rodas</div>
+        <div class="boss-detail">📍 Islas Egeas</div>
+        <div class="boss-detail">Requiere 20+ jugadores</div>
+        <div class="boss-drop">BOSS GIGANTE</div>
+      </div>
+      <div class="boss-card b4">
+        <span class="boss-emoji">🐍</span>
+        <div class="boss-name">Apophis</div>
+        <div class="boss-detail">Serpiente del Caos</div>
+        <div class="boss-detail">Evento raro mundial</div>
+        <div class="boss-drop">BOSS MUNDIAL</div>
+      </div>
+      <div class="boss-card b5">
+        <span class="boss-emoji">💢</span>
+        <div class="boss-name">Ares Avatar</div>
+        <div class="boss-detail">📍 Valle de Ares</div>
+        <div class="boss-detail">Aparece durante guerras</div>
+        <div class="boss-drop">PvP BOSS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-ornament">
+    ⚜ &nbsp; Los dioses observan. La historia la escriben los vencedores. &nbsp; ⚜
+  </div>
+</div>
+</body>
+</html>
